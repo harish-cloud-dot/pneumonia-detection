@@ -4,3 +4,4 @@ venv/
 chest_xray/
 *.h5
 temp.jpg
+.vscode/

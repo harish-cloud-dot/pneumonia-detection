@@ -3,11 +3,11 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import matplotlib.pyplot as plt
+import os
 
-# Dataset directories (download from Kaggle: chest_xray_pneumonia dataset)
-train_dir = "chest_xray/train"
-val_dir = "chest_xray/val"
-test_dir = "chest_xray/test"
+# Dataset directories
+train_dir = r"C:\Users\Harishkumar Ganesh\OneDrive\Desktop\pneumonia-detection\chest_xray\train"
+val_dir   = r"C:\Users\Harishkumar Ganesh\OneDrive\Desktop\pneumonia-detection\chest_xray\val"
 
 # Image parameters
 img_size = 150
@@ -20,7 +20,6 @@ train_datagen = ImageDataGenerator(
     zoom_range=0.2,
     horizontal_flip=True
 )
-
 val_datagen = ImageDataGenerator(rescale=1./255)
 
 train_generator = train_datagen.flow_from_directory(
@@ -62,10 +61,33 @@ loss, acc = model.evaluate(val_generator)
 print(f"Validation Accuracy: {acc*100:.2f}%")
 
 # Save trained model
-model.save("pneumonia_model.h5")
+os.makedirs("saved_models", exist_ok=True)
+model_path_h5 = os.path.join("saved_models", "pneumonia_model.h5")
+model_path_keras = os.path.join("saved_models", "pneumonia_model.keras")
+model.save(model_path_h5)
+model.save(model_path_keras)
+print(f"Model saved at:\n{model_path_h5}\n{model_path_keras}")
 
-# Plot accuracy
-plt.plot(history.history["accuracy"], label="Train Acc")
-plt.plot(history.history["val_accuracy"], label="Val Acc")
+# Save accuracy and loss plots
+os.makedirs("plots", exist_ok=True)
+plt.figure(figsize=(8,6))
+plt.plot(history.history["accuracy"], label="Train Accuracy")
+plt.plot(history.history["val_accuracy"], label="Validation Accuracy")
+plt.title("Accuracy")
+plt.xlabel("Epochs")
+plt.ylabel("Accuracy")
 plt.legend()
-plt.show()
+plt.savefig(os.path.join("plots", "accuracy.png"))
+plt.close()
+
+plt.figure(figsize=(8,6))
+plt.plot(history.history["loss"], label="Train Loss")
+plt.plot(history.history["val_loss"], label="Validation Loss")
+plt.title("Loss")
+plt.xlabel("Epochs")
+plt.ylabel("Loss")
+plt.legend()
+plt.savefig(os.path.join("plots", "loss.png"))
+plt.close()
+
+print("Plots saved in 'plots' folder. Training complete!")
